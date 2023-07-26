@@ -4,9 +4,13 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import dto.FraseChuckNorris;
 import edu.arelance.nube.repository.RestauranteRepository;
 import edu.arelance.nube.repository.entity.Restaurante;
 
@@ -75,7 +79,19 @@ public class RestauranteServiceImpl implements RestauranteService{
 		
 		return listaR;
 	}
+	@Override
+	@Transactional (readOnly = true)
+	public Iterable<Restaurante> buscarPorRangoPrecio (int preciomin, int preciomax, Pageable pageable)
+	{
+		Iterable<Restaurante> listaR = null;
+		
+			listaR = this.restauranteRepository.findByPrecioBetween(preciomin, preciomax, pageable);
+		
+		return listaR;
+	}
 	
+	@Override
+	@Transactional (readOnly = true)
 	public Iterable <Restaurante> buscarPorBarrioNombreOEspecialidad (String clave)
 	{
 		Iterable<Restaurante> listRest = null;
@@ -83,5 +99,33 @@ public class RestauranteServiceImpl implements RestauranteService{
 		
 	return listRest;
 	}
+
+	@Override
+	public Optional<FraseChuckNorris> obtenerFraseAleatorioChuckNorris() {
+		Optional<FraseChuckNorris> opChuck = Optional.empty();
+		FraseChuckNorris fraseChuckNorris = null;
+		RestTemplate restTemplate = null;
+		
+			restTemplate = new RestTemplate();
+		    fraseChuckNorris = restTemplate.getForObject("https://api.chucknorris.io/jokes/random", FraseChuckNorris.class);
+		    opChuck = Optional.of(fraseChuckNorris);
+		
+		return opChuck;
+	}
+	
+	@Override
+	public Iterable<Restaurante> obtenerTodosLosBarrios() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<Restaurante> consultarPorPagina(Pageable pageable) {
+		
+		return this.restauranteRepository.findAll(pageable);
+	}
+
+	
 
 }
